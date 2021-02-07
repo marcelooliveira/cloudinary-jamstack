@@ -13,3 +13,11 @@ li
   padding-right: .6em;
 }
 
+.login-menu {
+  display: flex;
+}
+
+.netlify-identity-menu:nth-of-type(2) {
+  display: none;
+}
+
