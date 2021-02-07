@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from "../components/Layout";
 import {Row, Col} from 'react-bootstrap'
 import Card from "react-bootstrap/Card";
+import Button from "react-bootstrap/Button";
 import { faHome as fasHome, faBed as fasBed, faBath as fasBath, faCar as fasCar } from '@fortawesome/free-solid-svg-icons';
 import { faUpload as fasUpload, faPlay as fasPlay, faDownload as fasDownload, faClock as fasClock } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as farHeart } from '@fortawesome/free-regular-svg-icons';
@@ -10,6 +11,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { default as NumberFormat } from 'react-number-format';
 import netlifyIdentity from 'netlify-identity-widget';
 import useSWR, { mutate } from 'swr'
+import getConfig from 'next/config';
+
+const { publicRuntimeConfig } = getConfig();
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 
@@ -33,7 +37,39 @@ const Home = () => {
       setWidgetInitialized(true)
     }
   })
- 
+
+  const uploadMediaClick = async (room) => {
+    
+    var myWidget = cloudinary.createUploadWidget({
+      cloudName: publicRuntimeConfig.cloudinaryCloudName,
+      upload_preset: publicRuntimeConfig.cloudinaryUploadPreset,
+      showAdvancedOptions: true
+    }, (error, result) => { 
+      
+      if (result.event == "success") {
+        if (result.info.resource_type == "video") {
+          
+          var videoId = result.info.public_id;
+          
+          fetch('/api/rooms/' + room.$loki, {
+            method: 'POST',
+            body: JSON.stringify({ videoId: videoId }),
+            headers: {
+              'Content-Type': 'application/json'
+            },
+          })
+          .then(res => mutate(room));
+        }
+      } 
+      else {
+        console.log(error);
+      }
+    })
+    
+    myWidget.update({tags: ['room-' + room.$loki]});
+    myWidget.open();
+  }
+
   return (
     <Layout>
       <div className="component-container p-4">
@@ -55,7 +91,7 @@ const Home = () => {
                   <button 
                   name="upload_widget" 
                   className="btn btn-primary btn-sm"
-                  ><FontAwesomeIcon icon={fasUpload} />&nbsp;Upload Video</button>
+                  onClick={uploadMediaClick.bind(this, room)}><FontAwesomeIcon icon={fasUpload} />&nbsp;Upload Video</button>
                   &nbsp;
                 </span>;
               } 
@@ -127,7 +163,6 @@ const Home = () => {
                       </h5>
                       <Card.Text><b>{room.address}</b></Card.Text>
                       <Card.Text><b>owner: {room.owner}</b></Card.Text>
-                      <Card.Text><b>userEmail: {userEmail}</b></Card.Text>
                       <Card.Text className="description" title="{realEstate.description}">
                         <b>
                           <FontAwesomeIcon icon={fasBed} />
