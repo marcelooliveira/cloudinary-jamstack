@@ -7,13 +7,16 @@ import { faHome as fasHome, faBed as fasBed, faBath as fasBath, faCar as fasCar 
 import { faUpload as fasUpload, faPlay as fasPlay, faDownload as fasDownload, faClock as fasClock } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as farHeart } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { data } from '../data/data.js'
 import { default as NumberFormat } from 'react-number-format';
 import netlifyIdentity from 'netlify-identity-widget';
+import useSWR, { mutate } from 'swr'
+
+const fetcher = (url) => fetch(url).then((r) => r.json());
 
 const Home = () => {
   const [userEmail, setUserEmail] = useState('');
   const [widgetInitialized, setWidgetInitialized] = useState(false);
+  const { data, error } = useSWR('/api/rooms/0', fetcher)
   
   useEffect(() => {
     if (!widgetInitialized) {
@@ -39,7 +42,7 @@ const Home = () => {
             <FontAwesomeIcon icon={fasHome} />
             &nbsp;Roommate match app</h3>
           <Row>
-            {data.map((room) => {
+            {data && data.map((room) => {
               let uploadButton;
               let playButton;
               let requestButton;
