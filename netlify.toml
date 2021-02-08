@@ -1,7 +1,7 @@
 [build]
   command = "npm run build"
   publish = "out"
-  functions = "functions"
+  functions = "/pages/api"
 
 [[plugins]]
 package = "@netlify/plugin-sitemap"
