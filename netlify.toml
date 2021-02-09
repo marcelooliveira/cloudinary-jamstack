@@ -9,6 +9,8 @@ package = "@netlify/plugin-sitemap"
   [plugins.inputs]
   buildDir = "out"
 
+package = "@netlify/plugin-nextjs"
+
 [[redirects]]
     from = "/api/*"
     to= "/.netlify/functions/:splat"
